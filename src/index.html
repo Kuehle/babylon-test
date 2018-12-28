@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        html, body {
+            overflow: hidden;
+            width   : 100%;
+            height  : 100%;
+            margin  : 0;
+            padding : 0;
+        }
+    
+        #renderCanvas {
+            width   : 100%;
+            height  : 100%;
+            touch-action: none;
+        }
+    </style>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <title>Babylon - Getting Started</title>
+    <!-- Link to the last version of BabylonJS -->
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <!-- Link to the last version of BabylonJS loaders to enable loading filetypes such as .gltf -->
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <!-- Link to pep.js to ensure pointer events work consistently in all browsers -->
+    <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        // var map = [
+        //     [9,9,9,8,9,9,0,0],
+        //     [9,1,1,1,1,1,0,0],
+        //     [9,1,2,1,1,1,0,0],
+        //     [9,1,1,1,2,1,0,0],
+        //     [9,1,1,1,1,1,1,0],
+        //     [9,1,1,1,1,1,1,0],
+        //     [9,1,1,1,1,1,0,0],
+        //     [9,1,1,1,1,1,0,0],
+        //     [9,1,1,5,1,1,0,0],
+        //     [9,1,1,1,1,1,0,0],
+        //     [9,9,9,9,8,9,0,0]
+        // ]
+
+        var map = [
+            [0,0],
+            [0,0]
+        ]
+
+        var gameObjects = {
+            0: createWater
+            // 1: createFloor,
+            // 2: createOponent,
+            // 5: createPlayer,
+            // 9: createWall
+        }
+
+        function createMap(map, scene) {
+            map.forEach((row, z) => {
+                row.forEach((cell, x) => {
+                    createWater({x, z}, scene)
+                })
+            })   
+        }
+
+        function createWater(position, scene) {
+            position.y = 0.1 * Math.random()
+            console.log('creating water at', position)
+            var water = BABYLON.MeshBuilder.CreateBox('water-' + Math.random(), {size: 1}, scene)
+            water.position = position
+            return water
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            main()
+        });
+
+        function main() {
+            var canvas = document.querySelector('#renderCanvas')
+            var engine = new BABYLON.Engine(canvas, true)
+
+            var scene = createScene(canvas, engine)
+
+            engine.runRenderLoop(function() {
+                scene.render()
+            })
+
+            window.addEventListener('resize', function() {
+                engine.resize()
+            })
+        }
+
+        function createScene(canvas, engine) {
+            var scene = new BABYLON.Scene(engine)
+            // var camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene)
+            var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 8, BABYLON.Vector3.Zero(), scene);
+
+
+            camera.setTarget(BABYLON.Vector3.Zero())
+            camera.attachControl(canvas, false)
+
+            var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene)
+            // var sphere = BABYLON.MeshBuilder.CreateSphere('sphere', {segments: 16, diameter: 2}, scene)
+            // var water1 = BABYLON.MeshBuilder.CreateBox('water1', {size: 1}, scene)
+            // var water2 = BABYLON.MeshBuilder.CreateBox('water2', {size: 1}, scene)
+            // water2.position.x = 2
+            // water2.position.z = 2
+
+
+            // sphere.position.y = 1
+           createMap(map, scene)
+            // var ground = BABYLON.MeshBuilder.CreateGround('ground1', {height: 6, width: 6, subdivisions: 2}, scene)
+
+            return scene
+        }
+    </script>
+</body>
+</html>
