@@ -115,7 +115,7 @@
                 cursor.pathMarkers = []
             },
             submit: function () {
-
+                player.moveTo(cursor.path)
             },
             mesh: undefined,
             pathMarkers: []
@@ -123,8 +123,26 @@
 
         var player = {
             mesh: undefined,
-            moveTo: function (position) {
-
+            moveTo: function (path) {
+                var animation = new BABYLON.Animation("myAnimation", "position.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, 1000);
+                var keys = path.map(function(position, i) {
+                    return {
+                        frame: 20 * (i + 1),
+                        value: position.x
+                    };
+                })
+                console.log('keys', keys)
+                animation.setKeys(keys)
+                player.mesh.animations = []
+                player.mesh.animations.push(animation)
+                var currentAnimation = scene.beginAnimation(
+                    player.mesh, 
+                    0, 
+                    20 * path.length,
+                    false, 
+                    undefined, 
+                    function() { cursor.reset() }
+                )
             }
         }
 
@@ -248,6 +266,7 @@
                             case 's': cursor.move('s'); break;
                             case 'd': cursor.move('e'); break;
                             case 'Escape': cursor.reset(); break;
+                            case 'Enter': cursor.submit(); break;
                         }
                         console.log(ev.sourceEvent.key)
                     }
