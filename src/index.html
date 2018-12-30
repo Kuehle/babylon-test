@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <style>
-        html, body {
+        html,
+        body {
             overflow: hidden;
-            width   : 100%;
-            height  : 100%;
-            margin  : 0;
-            padding : 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
-    
+
         #renderCanvas {
-            width   : 100%;
-            height  : 100%;
+            width: 100%;
+            height: 100%;
             touch-action: none;
         }
     </style>
-    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
     <title>Babylon - Getting Started</title>
     <!-- Link to the last version of BabylonJS -->
     <script src="https://preview.babylonjs.com/babylon.js"></script>
@@ -25,6 +27,7 @@
     <!-- Link to pep.js to ensure pointer events work consistently in all browsers -->
     <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
 </head>
+
 <body>
     <canvas id="renderCanvas"></canvas>
     <script>
@@ -36,16 +39,21 @@
                     return material
                 })(),
                 cursor: (function () {
-                    var material = new BABYLON.StandardMaterial('player', scene)
-                    material.diffuseColor = new BABYLON.Color3(1, .2, .8);                    
+                    var material = new BABYLON.StandardMaterial('cursor', scene)
+                    material.diffuseColor = new BABYLON.Color3(1, .2, .8);
                     material.wireframe = true
                     return material
                 })(),
-                floorSelected: (function () {
-                    var material = new BABYLON.StandardMaterial('floor-selected', scene)
-                    material.diffuseColor = new BABYLON.Color3(1, 0.5, 1)
+                floor: (function () {
+                    var material = new BABYLON.StandardMaterial('floor', scene)
+                    material.diffuseColor = new BABYLON.Color3(.9, .9, .7);
                     return material
-                })
+                })(),
+                floorSelected: (function () {
+                    var material = new BABYLON.StandardMaterial('floorSelected', scene)
+                    material.diffuseColor = new BABYLON.Color3(1, 0, 1);
+                    return material
+                })()
             }
             return materials
         }
@@ -55,30 +63,35 @@
         var scene
 
         var map = [
-            [9,9,9,9,9,9,1,1],
-            [9,2,2,2,2,2,1,1],
-            [9,2,2,2,2,2,1,1],
-            [9,2,2,2,2,2,1,1],
-            [9,2,2,2,2,2,1,1],
-            [9,2,2,2,2,2,1,1],
-            [9,9,9,9,9,9,1,1]
+            [9, 9, 9, 9, 9, 9, 1, 1],
+            [9, 2, 2, 2, 2, 2, 1, 1],
+            [9, 2, 2, 2, 2, 2, 1, 1],
+            [9, 2, 2, 2, 2, 2, 1, 1],
+            [9, 2, 2, 2, 2, 2, 1, 1],
+            [9, 2, 2, 2, 2, 2, 1, 1],
+            [9, 9, 9, 9, 9, 9, 1, 1]
         ]
 
         var mobs = [
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,3,0,0,0,0,0],
-            [0,0,0,0,3,0,0,0],
-            [0,0,5,6,0,0,0,0],
-            [0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0]
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 3, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 3, 0, 0, 0],
+            [0, 0, 5, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]
         ]
         // Event Sourching?
         var cursor = {
-            x: 5, 
-            z: 3,
+            x: undefined,
+            z: undefined,
             path: [],
-            move: function(direction) {
+            move: function (direction) {
+                if (!cursor.mesh) {
+                    createCursor(player.mesh.position, scene)
+                    cursor.x = player.mesh.position.x
+                    cursor.z = player.mesh.position.z
+                }
                 console.log('cursor moving in direction:', direction)
                 switch (direction) {
                     case 'n': cursor.x += 1; break;
@@ -86,19 +99,33 @@
                     case 'w': cursor.z += 1; break;
                     case 'e': cursor.z -= 1; break;
                 }
-                cursor.path.push({x: cursor.x, z: cursor.z})
+                cursor.path.push({ x: cursor.x, z: cursor.z })
                 cursor.mesh.setPositionWithLocalVector(new BABYLON.Vector3(cursor.x, 1, cursor.z))
-                createPathMarker({x: cursor.x, z: cursor.z}, scene)
+                createPathMarker({ x: cursor.x, z: cursor.z }, scene)
                 console.log('cursor:', cursor, player.position, cursor.path)
             },
-            reset: function() {
-                cursor.position = {x: player.x, z: player.z}
+            reset: function () {
+                cursor.x = undefined
+                cursor.z = undefined
+                cursor.position = { x: player.x, z: player.z }
+                cursor.mesh.dispose()
+                cursor.mesh = undefined
                 cursor.path = []
-                cursor.pathMarkers.forEach(function(pathMarker) {pathMarker.dispose()})
+                cursor.pathMarkers.forEach(function (pathMarker) { pathMarker.dispose() })
                 cursor.pathMarkers = []
+            },
+            submit: function () {
+
             },
             mesh: undefined,
             pathMarkers: []
+        }
+
+        var player = {
+            mesh: undefined,
+            moveTo: function (position) {
+
+            }
         }
 
         // var map = [
@@ -116,28 +143,42 @@
             9: createWall
         }
 
-        function doNothing() {}
+        function doNothing() { }
 
         function createMap(map, scene) {
             console.log('creating map')
             console.table(map)
             map.forEach((row, z) => {
                 row.forEach((cell, x) => {
-                    gameObjects[cell]({x, z}, scene)
+                    gameObjects[cell]({ x, z }, scene)
                 })
-            })   
+            })
         }
 
         function createWater(position, scene) {
             position.y = -0.2 - 0.1 * Math.random()
-            var water = BABYLON.MeshBuilder.CreateBox('water-' + Math.random(), {size: 1}, scene)
+            var water = BABYLON.MeshBuilder.CreateBox('water-' + Math.random(), { size: 1 }, scene)
             water.position = position
             return water
         }
 
         function createFloor(position, scene) {
-            position.y = 0
-            var floor = BABYLON.MeshBuilder.CreateBox('floor-' + Math.random(), {size: 1}, scene)
+            position.y = .5
+            var myPaths = [
+                [
+                    new BABYLON.Vector3(-0.5, 0, 0.5),
+                    new BABYLON.Vector3(0.5, 0, 0.5)
+                ],
+                [
+                    new BABYLON.Vector3(-0.5, 0, -0.5),
+                    new BABYLON.Vector3(0.5, 0, -0.5)
+                ]
+
+            ];
+
+            //Create ribbon with updatable parameter set to true for later changes
+            var floor = BABYLON.MeshBuilder.CreateRibbon("ribbon", { pathArray: myPaths }, scene);
+            floor.material = materials.floor
             floor.position = position
             return floor
         }
@@ -145,31 +186,31 @@
 
         function createWall(position, scene) {
             position.y = 0.8 + 0.1 * Math.random()
-            var wall = BABYLON.MeshBuilder.CreateBox('wall-' + Math.random(), {size: 1}, scene)
+            var wall = BABYLON.MeshBuilder.CreateBox('wall-' + Math.random(), { size: 1 }, scene)
             wall.position = position
             return wall
         }
 
         function createOponent(position, scene) {
             position.y = 1
-            var oponent = BABYLON.MeshBuilder.CreateSphere('oponent-' + Math.random(), {size: 1}, scene)
+            var oponent = BABYLON.MeshBuilder.CreateSphere('oponent-' + Math.random(), {}, scene)
             oponent.position = position
             return oponent
         }
 
         function createPlayer(position, scene) {
             position.y = 1
-            var newPlayer = BABYLON.MeshBuilder.CreateSphere('newPlayer-' + Math.random(), {size: 1}, scene)
+            var newPlayer = BABYLON.MeshBuilder.CreateSphere('newPlayer-' + Math.random(), {}, scene)
             newPlayer.position = position
             newPlayer.material = materials.player
-            player = newPlayer
+            player.mesh = newPlayer
 
             return newPlayer
         }
 
         function createCursor(position, scene) {
             position.y = 1
-            var newCursor = BABYLON.MeshBuilder.CreateSphere('newCursor-' + Math.random(), {size: 1, segments: 3}, scene)
+            var newCursor = BABYLON.MeshBuilder.CreateSphere('newCursor-' + Math.random(), { segments: 3 }, scene)
             newCursor.position = position
             newCursor.material = materials.cursor
             cursor.mesh = newCursor
@@ -179,15 +220,15 @@
 
         function createPathMarker(position, scene) {
             position.y = 1
-            var pathMarker = BABYLON.MeshBuilder.CreateSphere('pathMarker-' + Math.random(), {size: .1, segments: 3}, scene)
+            var pathMarker = BABYLON.MeshBuilder.CreateSphere('pathMarker-' + Math.random(), { diameter: .25, segments: 2 }, scene)
             pathMarker.position = position
             pathMarker.material = materials.cursor
             cursor.pathMarkers.push(pathMarker)
 
-            return pathMarker    
+            return pathMarker
         }
 
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             main()
         });
 
@@ -206,7 +247,9 @@
                             case 'a': cursor.move('w'); break;
                             case 's': cursor.move('s'); break;
                             case 'd': cursor.move('e'); break;
-                        }                      
+                            case 'Escape': cursor.reset(); break;
+                        }
+                        console.log(ev.sourceEvent.key)
                     }
                 )
             )
@@ -220,46 +263,47 @@
             materials = createMaterials(scene)
             createMap(map, scene)
             createMap(mobs, scene)
-            
 
-            engine.runRenderLoop(function() {
+
+            engine.runRenderLoop(function () {
                 scene.render()
             })
 
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 engine.resize()
             })
 
 
 
-            
+
         }
 
         function createScene(canvas, engine) {
             var scene = new BABYLON.Scene(engine)
             // var camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene)
-            var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI, Math.PI/4, map.length, new BABYLON.Vector3((map.length-1)/2, 0, (map[0].length-1)/2), scene);
+            var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI, Math.PI / 4, map.length, new BABYLON.Vector3((map.length - 1) / 2, 0, (map[0].length - 1) / 2), scene);
 
             // camera.setTarget(BABYLON.Vector3.Zero())
-             camera.attachControl(canvas, false)
+            camera.attachControl(canvas, false)
 
-            var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0.5,1,0.5), scene)
+            var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0.5, 1, 0.5), scene)
 
             return scene
-        
-//            function createGroundFromHeightMap() {
-                // var ground = BABYLON.MeshBuilder.CreateGroundFromHeightMap("gdhm", "heightmap.png", 
-                //     {width: map.length, height: map[0].length, subdivisions: 8, maxHeight: 3}, scene);
-                
-                // var wireframe = new BABYLON.StandardMaterial("wireframe", scene);
-                // wireframe.wireframe = true;
 
-                // ground.material = wireframe
+            //            function createGroundFromHeightMap() {
+            // var ground = BABYLON.MeshBuilder.CreateGroundFromHeightMap("gdhm", "heightmap.png", 
+            //     {width: map.length, height: map[0].length, subdivisions: 8, maxHeight: 3}, scene);
 
-//            }
+            // var wireframe = new BABYLON.StandardMaterial("wireframe", scene);
+            // wireframe.wireframe = true;
+
+            // ground.material = wireframe
+
+            //            }
         }
 
 
     </script>
 </body>
+
 </html>
