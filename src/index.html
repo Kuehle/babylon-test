@@ -52,6 +52,7 @@
 
         var materials
         var player
+        var scene
 
         var map = [
             [9,9,9,9,9,9,1,1],
@@ -82,19 +83,22 @@
                 switch (direction) {
                     case 'n': cursor.x += 1; break;
                     case 's': cursor.x -= 1; break;
-                    case 'e': cursor.z += 1; break;
-                    case 'w': cursor.z -= 1; break;
+                    case 'w': cursor.z += 1; break;
+                    case 'e': cursor.z -= 1; break;
                 }
                 cursor.path.push({x: cursor.x, z: cursor.z})
                 cursor.mesh.setPositionWithLocalVector(new BABYLON.Vector3(cursor.x, 1, cursor.z))
+                createPathMarker({x: cursor.x, z: cursor.z}, scene)
                 console.log('cursor:', cursor, player.position, cursor.path)
             },
             reset: function() {
                 cursor.position = {x: player.x, z: player.z}
-                
                 cursor.path = []
+                cursor.pathMarkers.forEach(function(pathMarker) {pathMarker.dispose()})
+                cursor.pathMarkers = []
             },
-            mesh: undefined
+            mesh: undefined,
+            pathMarkers: []
         }
 
         // var map = [
@@ -173,6 +177,16 @@
             return newCursor
         }
 
+        function createPathMarker(position, scene) {
+            position.y = 1
+            var pathMarker = BABYLON.MeshBuilder.CreateSphere('pathMarker-' + Math.random(), {size: .1, segments: 3}, scene)
+            pathMarker.position = position
+            pathMarker.material = materials.cursor
+            cursor.pathMarkers.push(pathMarker)
+
+            return pathMarker    
+        }
+
         window.addEventListener('DOMContentLoaded', function() {
             main()
         });
@@ -181,7 +195,7 @@
             var canvas = document.querySelector('#renderCanvas')
             var engine = new BABYLON.Engine(canvas, true)
 
-            var scene = createScene(canvas, engine)
+            scene = createScene(canvas, engine)
             scene.actionManager = new BABYLON.ActionManager(scene)
             scene.actionManager.registerAction(
                 new BABYLON.ExecuteCodeAction(
@@ -224,11 +238,10 @@
         function createScene(canvas, engine) {
             var scene = new BABYLON.Scene(engine)
             // var camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene)
-            var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 8, BABYLON.Vector3.Zero(), scene);
+            var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI, Math.PI/4, map.length, new BABYLON.Vector3((map.length-1)/2, 0, (map[0].length-1)/2), scene);
 
-
-            camera.setTarget(BABYLON.Vector3.Zero())
-            camera.attachControl(canvas, false)
+            // camera.setTarget(BABYLON.Vector3.Zero())
+             camera.attachControl(canvas, false)
 
             var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0.5,1,0.5), scene)
 
