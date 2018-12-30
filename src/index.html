@@ -35,6 +35,12 @@
                     material.diffuseColor = new BABYLON.Color3(1, 0, 1);
                     return material
                 })(),
+                cursor: (function () {
+                    var material = new BABYLON.StandardMaterial('player', scene)
+                    material.diffuseColor = new BABYLON.Color3(1, .2, .8);                    
+                    material.wireframe = true
+                    return material
+                })(),
                 floorSelected: (function () {
                     var material = new BABYLON.StandardMaterial('floor-selected', scene)
                     material.diffuseColor = new BABYLON.Color3(1, 0.5, 1)
@@ -62,36 +68,33 @@
             [0,0,0,0,0,0,0,0],
             [0,0,3,0,0,0,0,0],
             [0,0,0,0,3,0,0,0],
-            [0,0,5,0,0,0,0,0],
+            [0,0,5,6,0,0,0,0],
             [0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0]
         ]
-
+        // Event Sourching?
         var cursor = {
             x: 5, 
             z: 3,
+            path: [],
             move: function(direction) {
                 console.log('cursor moving in direction:', direction)
                 switch (direction) {
-                    case 'n':
-                        cursor.x += 1
-                        break;
-                    case 's':
-                        cursor.x -= 1
-                        break;
-                    case 'e':
-                        cursor.z -= 1
-                        break;
-                    case 'w':
-                        cursor.z += 1
-                        break;
-                    default:
-                        break;
-                    
+                    case 'n': cursor.x += 1; break;
+                    case 's': cursor.x -= 1; break;
+                    case 'e': cursor.z += 1; break;
+                    case 'w': cursor.z -= 1; break;
                 }
-                player.setPositionWithLocalVector(new BABYLON.Vector3(cursor.x, 1, cursor.z))
-                console.log('cursor:', cursor, player.position)
-            }
+                cursor.path.push({x: cursor.x, z: cursor.z})
+                cursor.mesh.setPositionWithLocalVector(new BABYLON.Vector3(cursor.x, 1, cursor.z))
+                console.log('cursor:', cursor, player.position, cursor.path)
+            },
+            reset: function() {
+                cursor.position = {x: player.x, z: player.z}
+                
+                cursor.path = []
+            },
+            mesh: undefined
         }
 
         // var map = [
@@ -105,6 +108,7 @@
             2: createFloor,
             3: createOponent,
             5: createPlayer,
+            6: createCursor,
             9: createWall
         }
 
@@ -159,7 +163,15 @@
             return newPlayer
         }
 
+        function createCursor(position, scene) {
+            position.y = 1
+            var newCursor = BABYLON.MeshBuilder.CreateSphere('newCursor-' + Math.random(), {size: 1, segments: 3}, scene)
+            newCursor.position = position
+            newCursor.material = materials.cursor
+            cursor.mesh = newCursor
 
+            return newCursor
+        }
 
         window.addEventListener('DOMContentLoaded', function() {
             main()
