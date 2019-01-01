@@ -92,7 +92,11 @@
             x: undefined,
             z: undefined,
             path: [],
+            moveDisabled: false,
             move: function (direction) {
+                if (cursor.moveDisabled) {
+                    return 
+                }
                 if (!cursor.mesh) {
                     createCursor(player.mesh.position, scene)
                     cursor.x = player.mesh.position.x
@@ -128,8 +132,10 @@
                 cursor.path = []
                 cursor.pathMarkers.forEach(function (pathMarker) { pathMarker.dispose() })
                 cursor.pathMarkers = []
+                cursor.moveDisabled = false
             },
             submit: function () {
+                cursor.moveDisabled = true
                 player.moveTo(cursor.path)
             },
             mesh: undefined,
