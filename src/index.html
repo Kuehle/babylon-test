@@ -70,7 +70,7 @@
 
         var map = [
             [2, 2, 2, 2, 2, 2, 2, 2],
-            [2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 1, 1, 1, 2, 2, 2],
             [2, 2, 2, 2, 2, 2, 2, 2],
             [2, 2, 2, 2, 2, 2, 2, 2],
             [2, 2, 2, 2, 2, 2, 2, 2],
@@ -99,15 +99,25 @@
                     cursor.z = player.mesh.position.z
                 }
                 console.log('cursor moving in direction:', direction)
+                var newPosition = {x: cursor.x, z: cursor.z}
                 switch (direction) {
-                    case 'n': cursor.x += 1; break;
-                    case 's': cursor.x -= 1; break;
-                    case 'w': cursor.z += 1; break;
-                    case 'e': cursor.z -= 1; break;
+                    case 'n': newPosition.x += 1; break;
+                    case 's': newPosition.x -= 1; break;
+                    case 'w': newPosition.z += 1; break;
+                    case 'e': newPosition.z -= 1; break;
                 }
-                cursor.path.push({ x: cursor.x, z: cursor.z })
-                cursor.mesh.setPositionWithLocalVector(new BABYLON.Vector3(cursor.x, 1, cursor.z))
-                createPathMarker({ x: cursor.x, z: cursor.z }, scene)
+                if (isAccessable(newPosition)) {
+                    cursor.x = newPosition.x
+                    cursor.z = newPosition.z
+                    cursor.path.push({ x: newPosition.x, z: newPosition.z })
+                    cursor.mesh.setPositionWithLocalVector(new BABYLON.Vector3(newPosition.x, 1, newPosition.z))
+                    createPathMarker({ x: newPosition.x, z: newPosition.z }, scene)
+                }
+
+                function isAccessable(position) {
+                    console.log('ch')
+                    return map[position.z][position.x] === 2
+                }
             },
             reset: function () {
                 cursor.x = undefined
