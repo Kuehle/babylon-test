@@ -53,7 +53,13 @@
                     var material = new BABYLON.StandardMaterial('floorSelected', scene)
                     material.diffuseColor = new BABYLON.Color3(1, 0, 1);
                     return material
-                })()
+                })(),
+                floorWalkable: (function () {
+                    var material = new BABYLON.StandardMaterial('floorWalkable', scene)
+                    material.diffuseColor = new BABYLON.Color3(1, 0, 1);
+                    material.alpha = 0.2
+                    return material
+                })(),
             }
             return materials
         }
@@ -63,13 +69,13 @@
         var scene
 
         var map = [
-            [9, 9, 9, 9, 9, 9, 1, 1],
-            [9, 2, 2, 2, 2, 2, 1, 1],
-            [9, 2, 2, 2, 2, 2, 1, 1],
-            [9, 2, 2, 2, 2, 2, 1, 1],
-            [9, 2, 2, 2, 2, 2, 1, 1],
-            [9, 2, 2, 2, 2, 2, 1, 1],
-            [9, 9, 9, 9, 9, 9, 1, 1]
+            [2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 2, 2, 2, 2, 2, 2, 2]
         ]
 
         var mobs = [
@@ -180,7 +186,7 @@
 
         function createFloor(position, scene) {
             position.y = .5
-            var myPaths = [
+            var floorPaths = [
                 [
                     new BABYLON.Vector3(-0.5, 0, 0.5),
                     new BABYLON.Vector3(0.5, 0, 0.5)
@@ -193,12 +199,33 @@
             ];
 
             //Create ribbon with updatable parameter set to true for later changes
-            var floor = BABYLON.MeshBuilder.CreateRibbon("ribbon", { pathArray: myPaths }, scene);
+            var floor = BABYLON.MeshBuilder.CreateRibbon("floor-" + Math.random(), { pathArray: floorPaths }, scene);
             floor.material = materials.floor
             floor.position = position
+            createWalkableIndicator(position, scene)
             return floor
         }
 
+        function createWalkableIndicator(position, scene) {
+            var pos = {x: position.x, y: 0.501, z: position.z}
+            console.log(position, pos)
+            var walkablePaths = [
+                [
+                    new BABYLON.Vector3(-0.4, 0, 0.4),
+                    new BABYLON.Vector3(0.4, 0, 0.4)
+                ],
+                [
+                    new BABYLON.Vector3(-0.4, 0, -0.4),
+                    new BABYLON.Vector3(0.4, 0, -0.4)
+                ]
+
+            ];
+
+            var walkable = BABYLON.MeshBuilder.CreateRibbon("walkable-" + Math.random(), { pathArray: walkablePaths }, scene);
+            walkable.material = materials.floorWalkable
+            walkable.position = pos
+            return walkable
+        }
 
         function createWall(position, scene) {
             position.y = 0.8 + 0.1 * Math.random()
@@ -209,14 +236,14 @@
 
         function createOponent(position, scene) {
             position.y = 1
-            var oponent = BABYLON.MeshBuilder.CreateSphere('oponent-' + Math.random(), {}, scene)
+            var oponent = BABYLON.MeshBuilder.CreateSphere('oponent-' + Math.random(), {diameter: 0.7}, scene)
             oponent.position = position
             return oponent
         }
 
         function createPlayer(position, scene) {
             position.y = 1
-            var newPlayer = BABYLON.MeshBuilder.CreateSphere('newPlayer-' + Math.random(), {}, scene)
+            var newPlayer = BABYLON.MeshBuilder.CreateSphere('newPlayer-' + Math.random(), {diameter: 0.7}, scene)
             newPlayer.position = position
             newPlayer.material = materials.player
             player.mesh = newPlayer
@@ -226,7 +253,7 @@
 
         function createCursor(position, scene) {
             position.y = 1
-            var newCursor = BABYLON.MeshBuilder.CreateSphere('newCursor-' + Math.random(), { segments: 3 }, scene)
+            var newCursor = BABYLON.MeshBuilder.CreateSphere('newCursor-' + Math.random(), { diameter: 0.7, segments: 3 }, scene)
             newCursor.position = position
             newCursor.material = materials.cursor
             cursor.mesh = newCursor
@@ -236,7 +263,7 @@
 
         function createPathMarker(position, scene) {
             position.y = 1
-            var pathMarker = BABYLON.MeshBuilder.CreateSphere('pathMarker-' + Math.random(), { diameter: .25, segments: 2 }, scene)
+            var pathMarker = BABYLON.MeshBuilder.CreateSphere('pathMarker-' + Math.random(), { diameter: .20, segments: 2 }, scene)
             pathMarker.position = position
             pathMarker.material = materials.cursor
             cursor.pathMarkers.push(pathMarker)
