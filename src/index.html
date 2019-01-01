@@ -241,6 +241,15 @@
             pathMarker.material = materials.cursor
             cursor.pathMarkers.push(pathMarker)
 
+            pathMarker.actionManager = new BABYLON.ActionManager(scene)
+            pathMarker.actionManager.registerAction( new BABYLON.ExecuteCodeAction(
+                {
+                    trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
+                    parameter: player.mesh
+                },
+                function () {setTimeout(function() {pathMarker.visibility = false}, 300) }
+            ))
+
             return pathMarker
         }
 
