@@ -123,8 +123,8 @@
         var player = {
             mesh: undefined,
             moveTo: function (path) {
-                var animationDuration = 30 
-                var animation = new BABYLON.Animation("myAnimation", "position", animationDuration, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, 1000);
+                var animationDuration = 11
+                var animation = new BABYLON.Animation("myAnimation", "position", 30, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, animationDuration * path.length);
                 var keys = path.map(function(position, i) {
                     return {
                         frame: animationDuration * (i + 1),
@@ -247,7 +247,7 @@
                     trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
                     parameter: player.mesh
                 },
-                function () {setTimeout(function() {pathMarker.visibility = false}, 300) }
+                function () {setTimeout(function() {pathMarker.visibility = false}, 120) }
             ))
 
             return pathMarker
