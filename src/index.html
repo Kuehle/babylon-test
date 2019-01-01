@@ -102,7 +102,6 @@
                 cursor.path.push({ x: cursor.x, z: cursor.z })
                 cursor.mesh.setPositionWithLocalVector(new BABYLON.Vector3(cursor.x, 1, cursor.z))
                 createPathMarker({ x: cursor.x, z: cursor.z }, scene)
-                console.log('cursor:', cursor, player.position, cursor.path)
             },
             reset: function () {
                 cursor.x = undefined
@@ -124,32 +123,31 @@
         var player = {
             mesh: undefined,
             moveTo: function (path) {
-                var animation = new BABYLON.Animation("myAnimation", "position.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, 1000);
+                var animationDuration = 30 
+                var animation = new BABYLON.Animation("myAnimation", "position", animationDuration, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, 1000);
                 var keys = path.map(function(position, i) {
                     return {
-                        frame: 20 * (i + 1),
-                        value: position.x
+                        frame: animationDuration * (i + 1),
+                        value: {x: position.x, y: 1, z: position.z}
                     };
                 })
-                console.log('keys', keys)
+                keys.unshift({
+                    frame: 0,
+                    value: player.mesh.position
+                })
                 animation.setKeys(keys)
                 player.mesh.animations = []
                 player.mesh.animations.push(animation)
                 var currentAnimation = scene.beginAnimation(
                     player.mesh, 
                     0, 
-                    20 * path.length,
+                    animationDuration * path.length,
                     false, 
                     undefined, 
                     function() { cursor.reset() }
                 )
             }
         }
-
-        // var map = [
-        //     [0,0],
-        //     [0,0]
-        // ]
 
         var gameObjects = {
             0: doNothing,
