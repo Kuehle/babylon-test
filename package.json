@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "babylon": "^6.18.0",
+    "jimp": "^0.6.0",
     "simplex-noise": "^2.4.0"
   }
 }
